@@ -70,25 +70,26 @@
 
           <!-- Menu -->
 
-                @include('layout.inc.sidebar')
+          @include('layout.inc.sidebar')
           <!-- / Menu -->
 
           <!-- Layout container -->
           <div class="layout-page">
             <!-- Navbar -->
 
-            @include('layout.inc..navbar')
+            @include('layout.inc.navbar')
+
             <!-- / Navbar -->
 
             <!-- Content wrapper -->
             <div class="content-wrapper">
               <!-- Content -->
-                <h1>@yield('judul')</h1>
+              <h1>@yield('judul')</h1>
               <div class="container-xxl flex-grow-1 container-p-y">
                 @yield('content')
               </div>
               <!-- / Content -->
-
+              <div class="content-backdrop fade"></div>
               <!-- Footer -->
               <footer class="content-footer footer bg-footer-theme">
                 <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
@@ -121,8 +122,6 @@
                 </div>
               </footer>
               <!-- / Footer -->
-
-              <div class="content-backdrop fade"></div>
             </div>
             <!-- Content wrapper -->
           </div>
@@ -143,7 +142,6 @@
     <script src="{{ asset('assets/assets/vendor/js/bootstrap.js') }}"></script>
     <script src="{{ asset('assets/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 
-
     <script src="{{ asset('assets/assets/vendor/js/menu.js') }}"></script>
     <!-- endbuild -->
 
@@ -156,6 +154,64 @@
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    @include('sweetalert::alert', ['cdn' => "https://cdn.jsdelivr.net/npm/sweetalert2@9"])
+    @include('sweetalert::alert', ['cdn' => 'https://cdn.jsdelivr.net/npm/sweetalert2@9'])
+
+    <script>
+        $('#id_paket').change(function() {
+            let id_paket = $(this).val();
+
+            $.ajax({
+                url: '/get-paket/' + id_paket,
+                type: 'GET',
+                dataType: 'json',
+                success: function(resp) {
+                    $('#price').val(resp.price)
+                }
+            })
+
+        });
+        // let button = document.querySelector('.add-row');
+        $('.add-row').click(function(e) {
+            e.preventDefault();
+            let nama_paket = $('#id_paket').find('option:selected').text(),
+               id_paket = $('#id_paket').val(),
+                harga = $('#price').val();
+                qty = $('.qty').val();
+                subtotal = parseInt(harga) * parseInt(qty);
+                console.log(subtotal);
+
+
+            if(id_paket == ""){
+                alert("Paket harus dipilih!");
+                return false;
+            }
+
+            if(qty == ""){
+                alert("mohon isi qty");
+                return false;
+            }
+            let newRow = "";
+            newRow += "<tr>";
+            newRow += "<td>" + nama_paket + "<input type='hidden' name='id_paket[]' class='id_paket form-control' value='" + id_paket + "'></td>";
+            newRow += "<td>" + harga +"<input type='hidden' name='price_service[]' value='" + harga + "'></td>";
+            newRow += "<td>" + qty + "<input type='hidden' name='qty[]' id='qty' value='" + qty + "'></td>";
+            newRow += "<td>" + subtotal + "<input type='hidden' class='subtotal' name='subtotal[]' value='" + subtotal + "'></td>";
+            newRow += "</tr>";
+
+            let tbody = $('.tbody-parent');
+            tbody.append(newRow);
+            $('#id_paket').val("");
+            $('.qty').val("");
+
+            let total =0;
+            $('.subtotal').each(function(){
+                let totalHarga=parseFloat($(this).val()) || 0;
+                total += totalHarga;
+            });
+
+            $('.total-harga').val(total);
+        });
+    </script>
   </body>
 </html>
+
